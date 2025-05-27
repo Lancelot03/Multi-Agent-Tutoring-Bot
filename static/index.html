@@ -1,1 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #0056b3; }
+        textarea { width: 95%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;}
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+        .response { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; white-space: pre-wrap; /* To respect newlines */ }
+        .loader { display: none; margin: 10px auto; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Tutor Agent</h1>
+        <textarea id="queryInput" rows="4" placeholder="Ask a question about Math or Physics (e.g., 'What is Newton's second law?', 'calculate 5 * 7', 'What is the speed of light?')"></textarea>
+        <button onclick="submitQuery()">Ask Tutor</button>
+        <div class="loader" id="loader"></div>
+        <div id="responseArea" class="response" style="display:none;"></div>
+    </div>
 
+    <script>
+        async function submitQuery() {
+            const query = document.getElementById('queryInput').value;
+            if (!query.trim()) {
+                alert("Please enter a question.");
+                return;
+            }
+
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('responseArea').style.display = 'none';
+            document.getElementById('responseArea').textContent = '';
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('responseArea').style.display = 'block';
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    document.getElementById('responseArea').textContent = `Error: ${errorData.error || response.statusText}`;
+                    return;
+                }
+
+                const data = await response.json();
+                document.getElementById('responseArea').textContent = `Tutor says: ${data.answer}`;
+
+            } catch (error) {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('responseArea').style.display = 'block';
+                document.getElementById('responseArea').textContent = `Network or client-side error: ${error.message}`;
+                console.error("Fetch error:", error);
+            }
+        }
+    </script>
+</body>
+</html>
