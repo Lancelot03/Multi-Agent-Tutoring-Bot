@@ -1,1 +1,22 @@
-
+{
+    "speed of light": {
+        "value": 299792458,
+        "unit": "m/s",
+        "symbol": "c"
+    },
+    "gravitational constant": {
+        "value": 6.67430e-11,
+        "unit": "N(m/kg)^2",
+        "symbol": "G"
+    },
+    "planck constant": {
+        "value": 6.62607015e-34,
+        "unit": "J·s",
+        "symbol": "h"
+    },
+    "earth gravity": {
+        "value": 9.80665,
+        "unit": "m/s^2",
+        "symbol": "g"
+    }
+}
