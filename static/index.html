@@ -3,61 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tutor & Tools</title>
+    <title>AI Tutor & Agent Tools</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
-        header { background-color: #007bff; color: white; padding: 15px 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        nav { display: flex; justify-content: center; background-color: #6c757d; padding: 0;}
-        nav button { background: none; border: none; color: white; padding: 12px 20px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
-        nav button.active, nav button:hover { background-color: #0056b3; }
-        .container { max-width: 750px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); flex-grow: 1; }
-        h1, h2 { text-align: center; color: #0056b3; }
-        textarea, input[type="text"] { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;}
-        .action-button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; display: block; margin: 10px auto; }
-        .action-button:hover { background-color: #1e7e34; }
-        .response { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
-        .loader { display: none; margin: 10px auto; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        :root {
+            --primary-color: #007bff; /* Professional Blue */
+            --primary-hover-color: #0056b3;
+            --secondary-color: #6c757d; /* Muted Gray */
+            --secondary-hover-color: #5a6268;
+            --accent-color: #28a745; /* Green for actions */
+            --accent-hover-color: #1e7e34;
+            --light-bg-color: #f8f9fa; /* Very light gray for page background */
+            --container-bg-color: #ffffff; /* White for content containers */
+            --text-color: #343a40; /* Dark gray for text */
+            --border-color: #dee2e6; /* Light border color */
+            --response-bg-color: #e9ecef; /* Background for response areas */
+            --font-primary: 'Poppins', sans-serif;
+            --font-monospace: 'Roboto Mono', monospace;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--light-bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--primary-hover-color);
+        }
+        header h1 {
+            font-weight: 600;
+            font-size: 2.2em;
+            letter-spacing: 1px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: var(--container-bg-color);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        nav button {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: color 0.3s, border-bottom 0.3s;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        nav button i {
+            font-size: 1.1em; /* Icon size relative to text */
+        }
+        nav button.active, nav button:hover {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: 0 auto 30px auto;
+            background: var(--container-bg-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            flex-grow: 1;
+        }
+        .container h2 {
+            text-align: left;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 1.8em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            font-family: var(--font-primary);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        textarea:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            outline: none;
+        }
+        select {
+            appearance: none; /* For custom arrow later if desired */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px auto;
+            padding-right: 40px; /* Make space for arrow */
+        }
+
+
+        .action-button {
+            padding: 12px 25px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 500;
+            display: inline-flex; /* for icon alignment */
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .action-button:hover {
+            background-color: var(--accent-hover-color);
+            transform: translateY(-2px);
+        }
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .response {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--response-bg-color);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: var(--font-monospace);
+            font-size: 0.95em;
+            line-height: 1.7;
+        }
+        .response strong { /* If you want to highlight parts of the response */
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .tool-section select, .tool-section input { margin-bottom: 15px; }
-        .page { display: none; } /* Hide pages by default */
-        .page.active { display: block; } /* Show active page */
-        footer { text-align: center; padding: 15px; background-color: #343a40; color: white; margin-top: auto; }
+
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.5s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--text-color);
+            color: var(--light-bg-color);
+            margin-top: auto; /* Pushes footer to bottom */
+            font-size: 0.9em;
+        }
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Utility class for centering button if needed */
+        .center-button-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+
     </style>
 </head>
 <body>
     <header>
-        <h1>AI Tutor & Agent Tools</h1>
+        <h1><i class="fas fa-brain"></i> AI Tutor & Agent Tools</h1>
     </header>
     <nav>
-        <button id="tutorTab" onclick="showPage('tutorPage')">AI Tutor</button>
-        <button id="toolsTab" onclick="showPage('toolsPage')">Agent Tools</button>
+        <button id="tutorTab" onclick="showPage('tutorPage')"><i class="fas fa-user-graduate"></i> AI Tutor</button>
+        <button id="toolsTab" onclick="showPage('toolsPage')"><i class="fas fa-tools"></i> Agent Tools</button>
     </nav>
 
     <div id="tutorPage" class="container page">
-        <h2>Ask the AI Tutor</h2>
-        <textarea id="queryInput" rows="4" placeholder="Ask a question about Math, Physics, History, or Chemistry..."></textarea>
-        <button class="action-button" onclick="submitTutorQuery()">Ask Tutor</button>
+        <h2><i class="fas fa-question-circle"></i> Ask the AI Tutor</h2>
+        <textarea id="queryInput" rows="5" placeholder="Ask a question about Math, Physics, History, or Chemistry..."></textarea>
+        <div class="center-button-container">
+            <button class="action-button" onclick="submitTutorQuery()"><i class="fas fa-paper-plane"></i> Ask Tutor</button>
+        </div>
         <div class="loader" id="tutorLoader"></div>
         <div id="tutorResponseArea" class="response" style="display:none;"></div>
     </div>
 
     <div id="toolsPage" class="container page tool-section">
-        <h2>Interact with Agent Tools Directly</h2>
-        <label for="toolSelector">Select a Tool:</label>
+        <h2><i class="fas fa-cogs"></i> Interact with Agent Tools</h2>
+        <label for="toolSelector" style="display:block; margin-bottom: 8px; font-weight:500;">Select a Tool:</label>
         <select id="toolSelector" onchange="updateToolInputPlaceholder()">
             <!-- Options will be populated by JavaScript -->
         </select>
         <input type="text" id="toolInput" placeholder="Enter input for the selected tool...">
-        <button class="action-button" onclick="submitToolQuery()">Use Tool</button>
+        <div class="center-button-container">
+            <button class="action-button" onclick="submitToolQuery()"><i class="fas fa-play-circle"></i> Use Tool</button>
+        </div>
         <div class="loader" id="toolLoader"></div>
         <div id="toolResponseArea" class="response" style="display:none;"></div>
     </div>
 
     <footer>
-        <p>© 2024 AI Tutor Project</p>
+        <p>© AI Tutor. Built with <i class="fas fa-heart" style="color: #e25555;"></i> and AI.</p>
     </footer>
 
     <script>
+        // JavaScript remains largely the same as your previous version
+        // Minor tweaks might be needed for element IDs if they changed, but it looks consistent.
+
         const tutorLoader = document.getElementById('tutorLoader');
         const tutorResponseArea = document.getElementById('tutorResponseArea');
         const toolLoader = document.getElementById('toolLoader');
@@ -95,9 +297,9 @@
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || `HTTP error! status: ${response.status}`);
-                tutorResponseArea.textContent = `Tutor says: ${data.answer}`;
+                tutorResponseArea.innerHTML = `<strong>Tutor says:</strong><br>${data.answer.replace(/\n/g, '<br>')}`; // Preserve newlines
             } catch (error) {
-                tutorResponseArea.textContent = `Error: ${error.message}`;
+                tutorResponseArea.innerHTML = `<strong>Error:</strong> ${error.message}`;
                 console.error("Tutor fetch error:", error);
             } finally {
                 tutorLoader.style.display = 'none';
@@ -125,17 +327,19 @@
                 const option = document.createElement('option');
                 option.value = tool.id;
                 option.textContent = tool.name;
-                option.dataset.description = tool.description; // Store description
+                option.dataset.description = tool.description;
                 toolSelector.appendChild(option);
             });
-            updateToolInputPlaceholder(); // Set initial placeholder
+            updateToolInputPlaceholder();
         }
 
         function updateToolInputPlaceholder() {
             const selectedToolId = toolSelector.value;
             const selectedTool = availableTools.find(t => t.id === selectedToolId);
             if (selectedTool) {
-                toolInput.placeholder = `Input for ${selectedTool.name} (e.g., ${selectedTool.description.match(/e\.g\.,\s*'([^']*)'/)?.[1] || 'value'})`;
+                const exampleMatch = selectedTool.description.match(/e\.g\.,\s*'([^']*)'/);
+                const example = exampleMatch ? exampleMatch[1] : 'value';
+                toolInput.placeholder = `Input for ${selectedTool.name} (e.g., ${example})`;
             } else {
                 toolInput.placeholder = 'Enter input for the selected tool...';
             }
@@ -168,9 +372,12 @@
                  if (!response.ok) {
                     throw new Error(data.detail || data.error || `HTTP error! status: ${response.status}`);
                 }
-                toolResponseArea.textContent = `Tool: ${data.tool}\nInput: ${data.input}\nOutput: ${data.output}`;
+                toolResponseArea.innerHTML = // Using innerHTML for structure
+                    `<strong>Tool:</strong> ${data.tool}<br>` +
+                    `<strong>Input:</strong> ${data.input}<br>` +
+                    `<strong>Output:</strong><br>${data.output.replace(/\n/g, '<br>')}`; // Preserve newlines
             } catch (error) {
-                toolResponseArea.textContent = `Error: ${error.message}`;
+                toolResponseArea.innerHTML = `<strong>Error:</strong> ${error.message}`;
                 console.error("Tool fetch error:", error);
             } finally {
                 toolLoader.style.display = 'none';
@@ -180,8 +387,8 @@
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            fetchTools(); // Load tool list for the tool selector
-            showPage('tutorPage'); // Show Tutor page by default
+            fetchTools();
+            showPage('tutorPage');
             document.getElementById('tutorTab').classList.add('active');
         });
     </script>
