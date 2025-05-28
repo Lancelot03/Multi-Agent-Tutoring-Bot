@@ -3,68 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tutor</title>
+    <title>AI Tutor & Tools</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
-        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #0056b3; }
-        textarea { width: 95%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;}
-        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #0056b3; }
-        .response { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; white-space: pre-wrap; /* To respect newlines */ }
+        body { font-family: sans-serif; margin: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: #007bff; color: white; padding: 15px 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        nav { display: flex; justify-content: center; background-color: #6c757d; padding: 0;}
+        nav button { background: none; border: none; color: white; padding: 12px 20px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
+        nav button.active, nav button:hover { background-color: #0056b3; }
+        .container { max-width: 750px; margin: 20px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); flex-grow: 1; }
+        h1, h2 { text-align: center; color: #0056b3; }
+        textarea, input[type="text"] { width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;}
+        .action-button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; display: block; margin: 10px auto; }
+        .action-button:hover { background-color: #1e7e34; }
+        .response { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
         .loader { display: none; margin: 10px auto; border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .tool-section select, .tool-section input { margin-bottom: 15px; }
+        .page { display: none; } /* Hide pages by default */
+        .page.active { display: block; } /* Show active page */
+        footer { text-align: center; padding: 15px; background-color: #343a40; color: white; margin-top: auto; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI Tutor Agent</h1>
-        <textarea id="queryInput" rows="4" placeholder="Ask a question about Math, Physics, History, or Chemistry (e.g., 'What is Newton's second law?', 'calculate 5 * 7', 'Who was Cleopatra?', 'What is Carbon?')"></textarea>
-        <button onclick="submitQuery()">Ask Tutor</button>
-        <div class="loader" id="loader"></div>
-        <div id="responseArea" class="response" style="display:none;"></div>
+    <header>
+        <h1>AI Tutor & Agent Tools</h1>
+    </header>
+    <nav>
+        <button id="tutorTab" onclick="showPage('tutorPage')">AI Tutor</button>
+        <button id="toolsTab" onclick="showPage('toolsPage')">Agent Tools</button>
+    </nav>
+
+    <div id="tutorPage" class="container page">
+        <h2>Ask the AI Tutor</h2>
+        <textarea id="queryInput" rows="4" placeholder="Ask a question about Math, Physics, History, or Chemistry..."></textarea>
+        <button class="action-button" onclick="submitTutorQuery()">Ask Tutor</button>
+        <div class="loader" id="tutorLoader"></div>
+        <div id="tutorResponseArea" class="response" style="display:none;"></div>
     </div>
 
+    <div id="toolsPage" class="container page tool-section">
+        <h2>Interact with Agent Tools Directly</h2>
+        <label for="toolSelector">Select a Tool:</label>
+        <select id="toolSelector" onchange="updateToolInputPlaceholder()">
+            <!-- Options will be populated by JavaScript -->
+        </select>
+        <input type="text" id="toolInput" placeholder="Enter input for the selected tool...">
+        <button class="action-button" onclick="submitToolQuery()">Use Tool</button>
+        <div class="loader" id="toolLoader"></div>
+        <div id="toolResponseArea" class="response" style="display:none;"></div>
+    </div>
+
+    <footer>
+        <p>© 2024 AI Tutor Project</p>
+    </footer>
+
     <script>
-        async function submitQuery() {
+        const tutorLoader = document.getElementById('tutorLoader');
+        const tutorResponseArea = document.getElementById('tutorResponseArea');
+        const toolLoader = document.getElementById('toolLoader');
+        const toolResponseArea = document.getElementById('toolResponseArea');
+        const toolSelector = document.getElementById('toolSelector');
+        const toolInput = document.getElementById('toolInput');
+
+        let availableTools = [];
+
+        // --- Tabbed Navigation ---
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            if (pageId === 'tutorPage') document.getElementById('tutorTab').classList.add('active');
+            if (pageId === 'toolsPage') document.getElementById('toolsTab').classList.add('active');
+        }
+
+        // --- AI Tutor Logic ---
+        async function submitTutorQuery() {
             const query = document.getElementById('queryInput').value;
             if (!query.trim()) {
-                alert("Please enter a question.");
+                alert("Please enter a question for the tutor.");
                 return;
             }
-
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('responseArea').style.display = 'none';
-            document.getElementById('responseArea').textContent = '';
+            tutorLoader.style.display = 'block';
+            tutorResponseArea.style.display = 'none';
+            tutorResponseArea.textContent = '';
 
             try {
                 const response = await fetch('/ask', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: query })
                 });
-
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('responseArea').style.display = 'block';
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    document.getElementById('responseArea').textContent = `Error: ${errorData.error || response.statusText}`;
-                    return;
-                }
-
                 const data = await response.json();
-                document.getElementById('responseArea').textContent = `Tutor says: ${data.answer}`;
-
+                if (!response.ok) throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                tutorResponseArea.textContent = `Tutor says: ${data.answer}`;
             } catch (error) {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('responseArea').style.display = 'block';
-                document.getElementById('responseArea').textContent = `Network or client-side error: ${error.message}`;
-                console.error("Fetch error:", error);
+                tutorResponseArea.textContent = `Error: ${error.message}`;
+                console.error("Tutor fetch error:", error);
+            } finally {
+                tutorLoader.style.display = 'none';
+                tutorResponseArea.style.display = 'block';
             }
         }
+
+        // --- Agent Tools Logic ---
+        async function fetchTools() {
+            try {
+                const response = await fetch('/tools/list');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to load tools');
+                availableTools = data.tools;
+                populateToolSelector();
+            } catch (error) {
+                console.error("Error fetching tools:", error);
+                toolSelector.innerHTML = '<option value="">Error loading tools</option>';
+            }
+        }
+
+        function populateToolSelector() {
+            toolSelector.innerHTML = '<option value="">-- Select a Tool --</option>';
+            availableTools.forEach(tool => {
+                const option = document.createElement('option');
+                option.value = tool.id;
+                option.textContent = tool.name;
+                option.dataset.description = tool.description; // Store description
+                toolSelector.appendChild(option);
+            });
+            updateToolInputPlaceholder(); // Set initial placeholder
+        }
+
+        function updateToolInputPlaceholder() {
+            const selectedToolId = toolSelector.value;
+            const selectedTool = availableTools.find(t => t.id === selectedToolId);
+            if (selectedTool) {
+                toolInput.placeholder = `Input for ${selectedTool.name} (e.g., ${selectedTool.description.match(/e\.g\.,\s*'([^']*)'/)?.[1] || 'value'})`;
+            } else {
+                toolInput.placeholder = 'Enter input for the selected tool...';
+            }
+        }
+
+        async function submitToolQuery() {
+            const selectedToolId = toolSelector.value;
+            const inputValue = toolInput.value;
+
+            if (!selectedToolId) {
+                alert("Please select a tool.");
+                return;
+            }
+            if (!inputValue.trim()) {
+                alert("Please enter input for the tool.");
+                return;
+            }
+
+            toolLoader.style.display = 'block';
+            toolResponseArea.style.display = 'none';
+            toolResponseArea.textContent = '';
+
+            try {
+                const response = await fetch(`/tools/${selectedToolId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ input_string: inputValue })
+                });
+                const data = await response.json();
+                 if (!response.ok) {
+                    throw new Error(data.detail || data.error || `HTTP error! status: ${response.status}`);
+                }
+                toolResponseArea.textContent = `Tool: ${data.tool}\nInput: ${data.input}\nOutput: ${data.output}`;
+            } catch (error) {
+                toolResponseArea.textContent = `Error: ${error.message}`;
+                console.error("Tool fetch error:", error);
+            } finally {
+                toolLoader.style.display = 'none';
+                toolResponseArea.style.display = 'block';
+            }
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchTools(); // Load tool list for the tool selector
+            showPage('tutorPage'); // Show Tutor page by default
+            document.getElementById('tutorTab').classList.add('active');
+        });
     </script>
 </body>
 </html>
