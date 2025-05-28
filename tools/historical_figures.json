@@ -1,0 +1,22 @@
+{
+    "cleopatra": {
+        "full_name": "Cleopatra VII Philopator",
+        "description": "The last active ruler of the Ptolemaic Kingdom of Egypt. A diplomat, naval commander, linguist, and medical author.",
+        "period": "69 BC – 30 BC"
+    },
+    "julius caesar": {
+        "full_name": "Gaius Julius Caesar",
+        "description": "A Roman general and statesman who played a critical role in the events that led to the demise of the Roman Republic and the rise of the Roman Empire.",
+        "period": "100 BC – 44 BC"
+    },
+    "napoleon bonaparte": {
+        "full_name": "Napoléon Bonaparte",
+        "description": "A French military and political leader who rose to prominence during the French Revolution and led several successful campaigns during the Revolutionary Wars. Emperor of the French from 1804 until 1814, and again briefly in 1815.",
+        "period": "1769 – 1821"
+    },
+    "genghis khan": {
+        "full_name": "Genghis Khan",
+        "description": "The founder and first Great Khan (Emperor) of the Mongol Empire, which became the largest contiguous empire in history after his death.",
+        "period": "c. 1162 – 1227"
+    }
+}
